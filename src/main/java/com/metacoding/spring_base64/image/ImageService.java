@@ -23,10 +23,10 @@ public class ImageService {
     public ImageResponse.DTO saveImage(ImageRequest.UploadDTO uploadDTO) throws IOException {
 
         String uuid = UUID.randomUUID().toString();
-    
+
         // 프론트에서 전달한 원본 파일명에서 확장자를 추출
         int dotIndex = uploadDTO.fileName().lastIndexOf('.');
-        String fileExtension= uploadDTO.fileName().substring(dotIndex + 1).trim().toLowerCase();
+        String fileExtension = uploadDTO.fileName().substring(dotIndex + 1).trim().toLowerCase();
 
         // 최종 저장 파일명은 uuid.확장자 형태
         String savedFileName = uuid + "." + fileExtension;
@@ -35,9 +35,6 @@ public class ImageService {
         byte[] fileBytes = Base64.getDecoder().decode(uploadDTO.fileData());
 
         Path uploadDir = Paths.get("uploads");
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
 
         Path filePath = uploadDir.resolve(savedFileName);
         Files.write(filePath, fileBytes);
