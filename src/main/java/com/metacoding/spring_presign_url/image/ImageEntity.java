@@ -1,4 +1,4 @@
-package com.metacoding.spring_base64.image;
+package com.metacoding.spring_presign_url.image;
 
 import java.time.LocalDateTime;
 
@@ -8,9 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
 
 @Getter
 @Entity
@@ -26,6 +26,7 @@ public class ImageEntity {
 
     private String uuid;
     private String fileName;
-    private String url;
+    private String originalUrl;
+    private String resizedUrl;
     private LocalDateTime createdAt;
 }

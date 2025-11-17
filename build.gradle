@@ -32,6 +32,9 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // AWS S3 연동 및 Presigned URL 생성을 위한 AWS SDK v2 라이브러리
+	implementation 'software.amazon.awssdk:s3:2.25.31'
 }
 
 tasks.named('test') {

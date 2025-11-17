@@ -1,21 +1,22 @@
-package com.metacoding.spring_base64.image;
+package com.metacoding.spring_presign_url.image;
 
 import java.time.LocalDateTime;
 
 public class ImageResponse {
-
     public record DTO(
             Long id,
             String uuid,
+            String originalUrl,
+            String resizedUrl,
             String fileName,
-            String url,
             LocalDateTime createdAt) {
         public static DTO fromEntity(ImageEntity imageEntity) {
             return new DTO(
                     imageEntity.getId(),
                     imageEntity.getUuid(),
+                    imageEntity.getOriginalUrl(),
+                    imageEntity.getResizedUrl(),
                     imageEntity.getFileName(),
-                    imageEntity.getUrl(),
                     imageEntity.getCreatedAt());
         }
     }

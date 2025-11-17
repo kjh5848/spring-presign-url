@@ -1,4 +1,4 @@
-package com.metacoding.spring_base64.image;
+package com.metacoding.spring_presign_url.image;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,4 +1,4 @@
-package com.metacoding.spring_base64._core.config;
+package com.metacoding.spring_presign_url._core.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
