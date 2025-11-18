@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -19,68 +20,74 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 public class ImageService {
 
     private final S3Presigner presigner;
+
+    //
     private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    
+
     @Value("${cloud.aws.region}")
     private String region;
-    
+
     private final ImageRepository imageRepository;
-    
+
+    /**
+     * original/{uuid}.ext 업로드 이후
+     * Lambda가 resized/{uuid}.jpg를 만들 때까지 최대 5초간 S3를 폴링한 뒤
+     * 두 파일이 모두 존재하면 DB에 저장하는 로직
+     */
     public ImageResponse.DTO checkAndSave(String originalKey) {
 
+        // original/{uuid}.ext → uuid 추출
         String uuid = originalKey.replace("original/", "").split("\\.")[0];
-        String ext = originalKey.substring(originalKey.lastIndexOf('.') + 1);
 
+        // resized/{uuid}.jpg 경로 구성
         String resizedKey = "resized/" + uuid + ".jpg";
 
-        // S3 정식 URL
+        // AWS 정식 URL 구성
         String originalUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + originalKey;
         String resizedUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + resizedKey;
 
-        // Polling
-        int attempts = 5;
-        for (int i = 0; i < attempts; i++) {
-
-            boolean originalExists = exists(originalKey);
-            boolean resizedExists = exists(resizedKey);
-
-            if (originalExists && resizedExists) {
-                ImageEntity entity = ImageEntity.builder()
-                        .uuid(uuid)
-                        .fileName(uuid + "." + ext)
-                        .originalUrl(originalUrl)
-                        .resizedUrl(resizedUrl)
-                        .createdAt(LocalDateTime.now())
-                        .build();
-
-                imageRepository.save(entity);
-                return ImageResponse.DTO.fromEntity(entity);
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-            }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
         }
 
+        // === 1번만 체크 ===
+        boolean originalExists = exists(originalKey); // 원본 파일 존재 여부
+        boolean resizedExists = exists(resizedKey); // 리사이즈 파일 존재 여부
+
+        // 두 파일 모두 존재하면 → DB 저장 후 응답 반환
+        if (originalExists && resizedExists) {
+            ImageEntity entity = ImageEntity.builder()
+                    .uuid(uuid)
+                    .fileName(uuid)
+                    .originalUrl(originalUrl)
+                    .resizedUrl(resizedUrl)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            imageRepository.save(entity);
+            return ImageResponse.DTO.fromEntity(entity);
+        }
+
+        // 5초 안에 Lambda가 파일을 생성하지 못한 경우
         throw new RuntimeException("5초 안에 original 또는 resized 파일이 생성되지 않았습니다.");
     }
 
     /**
      * S3 key 존재 여부 확인
-     * headObject()는 파일 없으면 NoSuchKeyException 예외 발생 → 반드시 감싸야 함
+     * headObject()는 key가 없으면 NoSuchKeyException 발생 → try/catch 필수
      */
     private boolean exists(String key) {
         try {
             s3Client.headObject(builder -> builder.bucket(bucket).key(key));
-            return true;
-        } catch (software.amazon.awssdk.services.s3.model.NoSuchKeyException e) {
+            return true; // 파일 존재
+        } catch (NoSuchKeyException e) {
             return false; // 파일 없음
         } catch (Exception e) {
-            return false; // 기타 예외도 파일 없음으로 처리
+            return false; // 기타 오류도 '존재하지 않음'으로 처리
         }
     }
 
