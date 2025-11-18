@@ -58,7 +58,6 @@ public class ImageService {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException ignored) {
-            Thread.currentThread().interrupt();
         }
         ImageEntity entity = ImageEntity.builder()
                 .uuid(uuid)
