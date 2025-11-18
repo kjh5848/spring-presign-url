@@ -36,9 +36,7 @@ public class ImageService {
     private final ImageRepository imageRepository;
 
     /**
-     * original/{uuid}.ext 업로드 이후
-     * Lambda가 resized/{uuid}.jpg를 만들 때까지 최대 5초간 S3를 폴링한 뒤
-     * 두 파일이 모두 존재하면 DB에 저장하는 로직
+     * original/{uuid}.ext 업로드 이후 DB에 저장하는 로직
      */
     public ImageResponse.DTO checkAndSave(ImageRequest.completeRequest reqDTO) {
 
@@ -54,11 +52,6 @@ public class ImageService {
         String originalUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + originalKey;
         String resizedUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + resizedKey;
 
-        // 5초 대기 후 s3 api 요청
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException ignored) {
-        }
         ImageEntity entity = ImageEntity.builder()
                 .uuid(uuid)
                 .fileName(reqDTO.fileName())
