@@ -20,4 +20,6 @@ public class ImageResponse {
                     imageEntity.getCreatedAt());
         }
     }
+    public static record PresignedUrlResponse(String key, String presignedUrl) {
+    }
 }

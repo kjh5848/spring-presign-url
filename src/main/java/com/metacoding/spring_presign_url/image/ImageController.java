@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,8 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping("/presigned")
-    public PresignedUrlResponse presign(@RequestBody ImageRequest.PresignRequest presignRequest) {
-        return imageService.generatePresignedUrl(presignRequest);
+    public ImageResponse.PresignedUrlResponse presign(@RequestBody ImageRequest.PresignRequest reqDTO) {
+        return imageService.generatePresignedUrl(reqDTO);
     }
 
     @GetMapping("/list")
@@ -34,11 +33,9 @@ public class ImageController {
         return imageService.findById(id);
     }
 
-    @GetMapping("/complete")
-    public ImageResponse.DTO complete(@RequestParam String key) {
-        return imageService.checkAndSave(key);
+    @PostMapping("/complete")
+    public ImageResponse.DTO complete(@RequestBody ImageRequest.completeRequest reqDTO) {
+        return imageService.checkAndSave(reqDTO);
     }
 
-    public static record PresignedUrlResponse(String key, String presignedUrl) {
-    }
 }

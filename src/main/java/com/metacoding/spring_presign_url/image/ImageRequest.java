@@ -6,4 +6,9 @@ public class ImageRequest {
             String contentType) {
     }
 
+    public record completeRequest(
+            String fileName,
+            String key) {
+    }
+
 }
