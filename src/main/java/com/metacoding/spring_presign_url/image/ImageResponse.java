@@ -2,6 +2,8 @@ package com.metacoding.spring_presign_url.image;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class ImageResponse {
     public record DTO(
             Long id,
@@ -9,6 +11,7 @@ public class ImageResponse {
             String originalUrl,
             String resizedUrl,
             String fileName,
+            @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
             LocalDateTime createdAt) {
         public static DTO fromEntity(ImageEntity imageEntity) {
             return new DTO(
@@ -23,3 +26,4 @@ public class ImageResponse {
     public static record PresignedUrlResponse(String key, String presignedUrl) {
     }
 }
+ㅠ
