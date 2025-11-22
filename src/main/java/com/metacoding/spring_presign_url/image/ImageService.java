@@ -31,6 +31,7 @@ public class ImageService {
 
     // S3에 직접 접근하는 클라이언트
     // - 파일 존재 여부(headObject), 삭제, 조회 등 서버에서 S3와 직접 통신할 때 사용
+    // - 웹훅으로 받을때 사용한다.
     private final S3Client s3Client;
 
     private final ImageRepository imageRepository;
